@@ -29,7 +29,6 @@ func main() {
 		i += 2
 	}
 	elapsed := time.Since(start)
-	fmt.Printf("Números primos : \n %v\n", primes)
 	fmt.Printf("Tempo percorrido: %v\n", elapsed)
 
 }
