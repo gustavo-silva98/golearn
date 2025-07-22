@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"sync"
+	"time"
 )
 
 type APIResponse struct {
@@ -23,6 +24,7 @@ type Card struct {
 
 func main() {
 	// Começa o teste de channels e goroutines
+	start := time.Now()
 	results := get_pokemon_pages(6, 3)
 
 	fmt.Println("\n--- Resultados Finais ---")
@@ -41,6 +43,8 @@ func main() {
 	}
 
 	fmt.Println("\nTodas as páginas foram processadas!")
+	elapsed := time.Since(start)
+	fmt.Printf("Tempo percorrido: %v\n", elapsed)
 }
 
 func worker(id int, jobs <-chan int, results chan<- []byte, wg *sync.WaitGroup) {
