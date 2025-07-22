@@ -7,7 +7,6 @@ import (
 	"log"
 	"net/http"
 	"sync"
-	"time"
 )
 
 type APIResponse struct {
@@ -23,69 +22,80 @@ type Card struct {
 }
 
 func main() {
-	resp, err := http.Get("https://api.pokemontcg.io/v2/cards?page=1&pageSize=50")
-	if err != nil {
-		panic(err)
-	}
-
-	defer resp.Body.Close()
-
-	fmt.Println("Response status:", resp.Status)
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		panic(err)
-	}
-
-	var apiResp APIResponse
-	err = json.Unmarshal(body, &apiResp)
-	if err != nil {
-		log.Fatal(err)
-	}
-	for idx, value := range apiResp.Data {
-		fmt.Printf("%v| ID: %v - Name: %v - Types: %v - Subtypes: %v - HP: %v\n", idx+1, value.Id, value.Name, value.Types, value.Subtypes, value.HP)
-	}
 	// Começa o teste de channels e goroutines
-
-	const numWorkers = 3
-	const numPages = 10
-
-	jobs := make(chan int, numPages)
-	results := make(chan string, numPages)
-
-	var wg sync.WaitGroup
-
-	for w := 1; w <= numWorkers; w++ {
-		wg.Add(1)
-		go worker(w, jobs, results, &wg)
-	}
-
-	for p := 1; p <= numPages; p++ {
-		jobs <- p
-	}
-	close(jobs)
-
-	wg.Wait()
-
-	close(results)
+	results := get_pokemon_pages(6, 3)
 
 	fmt.Println("\n--- Resultados Finais ---")
-	for res := range results { // Loop que lê do canal 'results' até ele ser fechado
-		fmt.Println(res)
+	var allCards []Card
+	for body := range results { // Loop que lê do canal 'results' até ele ser fechado
+		var resp APIResponse
+		if err := json.Unmarshal(body, &resp); err != nil {
+			log.Fatalf("Erro no Unmarshal: %v\n", err)
+		}
+		allCards = append(allCards, resp.Data...)
+	}
+
+	fmt.Printf("Total de cards carregados: %d\n", len(allCards))
+	for idx, value := range allCards {
+		fmt.Printf("%v| ID: %v - Name: %v - Types: %v - Subtypes: %v - HP: %v\n", idx+1, value.Id, value.Name, value.Types, value.Subtypes, value.HP)
 	}
 
 	fmt.Println("\nTodas as páginas foram processadas!")
 }
 
-func worker(id int, jobs <-chan int, results chan<- string, wg *sync.WaitGroup) {
+func worker(id int, jobs <-chan int, results chan<- []byte, wg *sync.WaitGroup) {
 
 	defer wg.Done()
 
 	for job := range jobs {
 		fmt.Printf("Trabalhador %d: Iniciando página %d\n", id, job)
-		time.Sleep(time.Second)
+		url := fmt.Sprintf("https://api.pokemontcg.io/v2/cards?page=%v&pageSize=250", job)
+		byteReq := get_http(url)
 		fmt.Printf("Trabalhador %d: Finalizou a página %d\n", id, job)
 
-		results <- fmt.Sprintf("Página %d processada pelo trabalhador %d", job, id)
+		results <- byteReq
 	}
+}
+
+func get_http(url string) []byte {
+	resp, err := http.Get(url)
+	if err != nil {
+		log.Fatalf("Erro ao fazer requisição na %v : Err = %v\n", url, err)
+	}
+
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalf("Erro ao ler body da url %v : Err = %v\n", url, err)
+	}
+	return body
+
+}
+
+func get_pokemon_pages(numPages int, numWorkers int) chan []byte {
+
+	// Criação de channels
+	jobs := make(chan int, numPages)
+	results := make(chan []byte, numPages)
+
+	var wg sync.WaitGroup
+
+	// Criação de workers e lançamento de Goroutines
+	for w := 1; w <= numWorkers; w++ {
+		wg.Add(1)
+		go worker(w, jobs, results, &wg)
+	}
+
+	// Lançamento dos indices das páginas no channel Jovs
+	for p := 1; p <= numPages; p++ {
+		jobs <- p
+	}
+	close(jobs) // Fecha canal depois de inserir todos os jobs
+
+	wg.Wait() // Trava a execução p/ syncronizar todos os workers
+
+	close(results) // Fecha o channel de results depois de finalizar os workers
+
+	return results
 }
