@@ -68,6 +68,9 @@ jobs:
 
         - name: Exibe info do binário
           run: file bootstrap
+        
+        - name: Make Bin executable
+          run: chmod +x bootstrap
 
-        - name: Executa binário 
+        - name: Executa binário
           run: ./bootstrap
