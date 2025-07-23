@@ -34,10 +34,13 @@ jobs:
         - name: Build the Go Binary
           run: GOOS=linux GOARCH=amd64 go build -o bootstrap main.go
 
+        - name: Valida o diretório
+          run: ls -R
+
         - name: Upload Go Binary
           uses: actions/upload-artifact@v4
           with: 
-            name: golang-bin
+            name: bootstrap
             path: bootstrap
 
         # -------------- testes binário -----------------
@@ -55,7 +58,7 @@ jobs:
         - name: Download Go Binary from build
           uses: actions/download-artifact@v4
           with:
-            name: golang-bin
+            name: bootstrap
             path: .
 
         - name: Display downloaded bin
