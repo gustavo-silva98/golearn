@@ -62,9 +62,12 @@ jobs:
 
         - name: Display downloaded bin
           run: ls -R
-        
-        - name: Run LS
-          run: ls -lh
 
         - name: Testa existencia do binario
           run: test -f bootstrap
+
+        - name: Exibe info do binário
+          run: file bootstrap
+
+        - name: Executa binário 
+          run: ./bootstrap
