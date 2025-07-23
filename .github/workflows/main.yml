@@ -1,1 +1,102 @@
 name: Teste Actions Golang
+
+on:
+    push:
+        branches:
+            - test_actions
+
+jobs:
+
+    build:
+        runs-on: ubuntu-latest
+        
+        defaults:
+            run:
+                shell: bash
+                working-directory: ./sum_ints
+
+
+        steps:
+        - name: Checkout Code
+          uses: actions/checkout@v4
+          with: 
+            sparse-checkout: |
+                sum_ints
+        
+        - name: Setup Golang
+          uses: actions/setup-go@v4
+          with:
+            go-version: '1.24.0'
+            
+        - name: Install Dependencies
+          run: go mod tidy
+
+        - name: Build the Go Binary
+          run: GOOS=linux GOARCH=amd64 go build -o bootstrap main.go
+
+        - name: Valida o diretório
+          run: ls -R
+
+        - name: Upload Go Binary
+          uses: actions/upload-artifact@v4
+          with: 
+            name: bootstrap
+            path: sum_ints/bootstrap
+
+        # -------------- testes binário -----------------
+
+    testa_binario:
+        needs: build
+        runs-on: ubuntu-latest
+
+        defaults:
+            run:
+                shell: bash
+
+        steps:
+        - name: Download Go Binary from build
+          uses: actions/download-artifact@v4
+          with:
+            name: bootstrap
+            path: .
+
+        - name: Display downloaded bin
+          run: ls -R
+
+        - name: Testa existencia do binario
+          run: test -f bootstrap
+
+        - name: Exibe info do binário
+          run: file bootstrap
+        
+        - name: Make Bin executable
+          run: chmod +x bootstrap
+
+        - name: Zipa o binário
+          run: zip function.zip bootstrap
+
+        #- name: Executa binário
+        #  run: ./bootstrap
+
+        # --------------- Testa deploy aws ---------------
+
+        - name: Configura AWS
+          uses: aws-actions/configure-aws-credentials@v4
+          with:
+            aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+            aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            aws-region: us-east-1
+
+        - name: mostra variáveis
+          run: |
+            echo "ACCESS-KEY-ID=$AWS_ACCESS_KEY_ID"
+            echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY"
+
+        - name: Confirma identidade AWS
+          run: |
+            aws sts get-caller-identity
+        
+
+        - name: Sobe .zip do binário
+          run: |
+            aws lambda update-function-code --function-name Go_Pokemon_TCG_Extract --zip-file fileb://function.zip
