@@ -95,3 +95,8 @@ jobs:
         - name: Confirma identidade AWS
           run: |
             aws sts get-caller-identity
+        
+
+        - name: Sobe .zip do binário
+          run: |
+            aws lambda update-function-code --funtion-name Go_Pokemon_TCG_Extract --zip-file fileb://function.zip
