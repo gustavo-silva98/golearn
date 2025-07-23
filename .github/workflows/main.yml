@@ -55,9 +55,9 @@ jobs:
         - name: Download Go Binary from build
           uses: actions/download-artifact@v4
           with:
-            name: golang-bin
+            name: bootstrap
 
-        - name: Display donwloaded bin
+        - name: Display downloaded bin
           run: ls -R
         
         - name: Run LS
