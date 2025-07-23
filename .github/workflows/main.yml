@@ -28,8 +28,8 @@ jobs:
           with:
             go-version: '1.24.0'
             
-        #- name: Install Dependencies
-        #  run: go mod tidy
+        - name: Install Dependencies
+          run: go mod tidy
 
         - name: Build the Go Binary
           run: GOOS=linux GOARCH=amd64 go build -o bootstrap main.go
@@ -71,6 +71,9 @@ jobs:
         
         - name: Make Bin executable
           run: chmod +x bootstrap
+
+        - name: Zipa o binário
+          run: zip function.zip bootstrap
 
         #- name: Executa binário
         #  run: ./bootstrap
