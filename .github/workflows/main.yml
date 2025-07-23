@@ -1,1 +1,29 @@
 name: Teste Actions Golang
+
+on:
+    push:
+        branches:
+            - test_actions
+
+jobs:
+
+    build:
+        runs-on: ubuntu-latest
+        
+        steps:
+        - name: Checkout Code
+          uses: actions/checkout@v4
+          with: 
+            sparse-checkout: |
+                sum_ints
+        
+        - name: Setup Golang
+          uses: actions/setup-go@v4
+          with:
+            go-version: '1.24.0'
+            
+        - name: Install Dependencies
+          run: go mod tidy
+
+        - name: Build the Go Binary
+          run: GOOS=linux GOARCH=amd64 go build -o bootstrap main.go
