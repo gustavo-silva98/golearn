@@ -27,7 +27,26 @@ jobs:
           uses: actions/setup-go@v4
           with:
             go-version: '1.24.0'
-
             
+        #- name: Install Dependencies
+        #  run: go mod tidy
+
         - name: Build the Go Binary
           run: GOOS=linux GOARCH=amd64 go build -o bootstrap main.go
+
+        # -------------- testes binário -----------------
+
+    testa_binario:
+        needs: build
+        runs-on: ubuntu-latest
+
+        steps:
+
+        - name: Checkout Code
+          uses: actions/checkout@v4
+          with: 
+            sparse-checkout: |
+                sum_ints
+        
+        - name: Testa existencia do binario
+          run: test -f bootstrap
