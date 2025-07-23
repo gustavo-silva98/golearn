@@ -52,7 +52,6 @@ jobs:
         defaults:
             run:
                 shell: bash
-                working-directory: ./sum_ints
 
         steps:
         - name: Download Go Binary from build
