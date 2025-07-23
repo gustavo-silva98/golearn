@@ -24,7 +24,7 @@ func handleRequest(ctx context.Context, event json.RawMessage) (int, error) {
 		log.Printf("Failed to unmarshal event: %v", err)
 		return 0, err
 	}
-	return sum_ints(3, 3), nil
+	return sum_ints(5, 5), nil
 }
 
 func sum_ints(a int, b int) int {
