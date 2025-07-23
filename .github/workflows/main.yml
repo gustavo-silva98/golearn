@@ -41,7 +41,7 @@ jobs:
           uses: actions/upload-artifact@v4
           with: 
             name: bootstrap
-            path: ./bootstrap
+            path: sum_ints/bootstrap
 
         # -------------- testes binário -----------------
 
