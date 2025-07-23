@@ -72,5 +72,19 @@ jobs:
         - name: Make Bin executable
           run: chmod +x bootstrap
 
-        - name: Executa binário
-          run: ./bootstrap
+        #- name: Executa binário
+        #  run: ./bootstrap
+
+        # --------------- Testa deploy aws ---------------
+
+        - name: Configura AWS
+          uses: aws-actions/configure-aws-credentials@v2
+          with:
+            aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+            aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            aws-region: us-east-1
+
+        - name: mostra variáveis
+          run: |
+            echo "ACCESS-KEY-ID=$AWS_ACCESS_KEY_ID"
+            echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY"
