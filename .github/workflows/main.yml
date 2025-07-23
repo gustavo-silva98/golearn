@@ -45,7 +45,6 @@ jobs:
                 shell: bash
                 working-directory: ./sum_ints
 
-
         steps:
 
         - name: Checkout Code
@@ -54,5 +53,8 @@ jobs:
             sparse-checkout: |
                 sum_ints
         
+        - name: Run LS
+          run: ls -lh
+          
         - name: Testa existencia do binario
           run: test -f bootstrap
