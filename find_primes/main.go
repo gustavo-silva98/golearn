@@ -1,16 +1,20 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"os"
 	"strconv"
-	"strings"
 	"time"
 )
 
 func main() {
-	num := scanner()
+	args := os.Args
+	fmt.Println(args[1])
+	num, err := strconv.Atoi(args[1])
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(args)
 	start := time.Now()
 	primes := make([]int, num)
 	next_prime_index := 0
@@ -29,23 +33,9 @@ func main() {
 		i += 2
 	}
 	elapsed := time.Since(start)
+	fmt.Println(primes)
 	fmt.Printf("Tempo percorrido: %v\n", elapsed)
 
-}
-
-func scanner() int {
-	fmt.Println("Digite o número de primos que você quer encontrar.")
-	for {
-		reader := bufio.NewReader(os.Stdin)
-		num_str, _ := reader.ReadString('\n')
-		num_str = strings.TrimSpace(num_str)
-		num, err := strconv.Atoi(num_str)
-		if err != nil {
-			fmt.Println("Digite um número inteiro, por favor.")
-			continue
-		}
-		return num
-	}
 }
 
 func isPrime(slice_primes []int, num int) bool {
